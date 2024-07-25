@@ -7,8 +7,8 @@ public class Controller {
     Model model;
     View view;
     Dictionary<String, Integer> pieces;
-    
-
+    Enumeration<String> k;
+    public int click = 0;
 
 
     public Controller(){
@@ -35,6 +35,7 @@ public class Controller {
         pieces.put("BlackQueen", 11);
         pieces.put("BlackKing", 12);
 
+        k = pieces.keys();
     }
 
 
@@ -48,15 +49,31 @@ public class Controller {
 				model.setBoardContents(x, y, 0);
 
         starting_pieces();
+        
 
         model.setPlayer(1);
         
-        System.out.println(model.hasFinished());
+        System.out.println("Startup");
     }
 
     
-    public void squareSelected(int player, int x, int y) {
-        System.out.println(model.getBoardContents(x, y));
+    public void squareSelected(int player, int x, int y){
+        System.out.println("x: "+x +" y: "+y+" " + model.getBoardContents(x, y));
+        if (click==0) {
+            view.feedback_to_user("Select location to move to");
+            click=1;
+        }else{
+            secondsquare(player, x, y);
+            click=0;
+        }
+        
+    }
+
+    //check move is valid--if true move piece
+    //if false--send user message no valid move and to choose another piece+location
+    public void secondsquare(int player, int x, int y){
+        view.feedback_to_user("Select piece to move");
+        view.update();
     }
 
 
@@ -90,6 +107,10 @@ public class Controller {
                 model.setBoardContents(i, j, pieces.get("Empty"));
             }
         }
+        view.update();
     }
+
+    
+
 
 }
