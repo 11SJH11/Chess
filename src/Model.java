@@ -7,7 +7,15 @@ public class Model
 	boolean finished;
 	View view;
 	Controller controller;
+	private int lastMoveFromX = -1;
+    private int lastMoveFromY = -1;
+    private int lastMoveToX = -1;
+    private int lastMoveToY = -1;
+    private int lastMovePiece = -1;
+
 	
+	public Model() {
+    }
 	
 	public void initialise(int width, int height, View view, Controller controller)
 	{
@@ -73,4 +81,17 @@ public class Model
 	{
 		this.finished = finished;
 	}
+
+	public void setLastMove(int fromX, int fromY, int toX, int toY, int piece) {
+        this.lastMoveFromX = fromX;
+        this.lastMoveFromY = fromY;
+        this.lastMoveToX = toX;
+        this.lastMoveToY = toY;
+        this.lastMovePiece = piece;
+    }
+
+    public boolean isLastMoveDoublePawnMove(int x, int y) {
+        return !(Math.abs(lastMoveToY - lastMoveFromY) == 2 && lastMoveToX == x && lastMoveToY == y &&
+            (lastMovePiece == 1 || lastMovePiece == 7));
+    }
 }

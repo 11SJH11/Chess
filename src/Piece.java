@@ -9,5 +9,5 @@ public abstract class Piece {
         this.player = player;
     }
 
-    public abstract boolean isValidMove(int fromX, int fromY, int toX, int toY, Model model);
+    public abstract int isValidMove(int fromX, int fromY, int toX, int toY, Model model);
 }

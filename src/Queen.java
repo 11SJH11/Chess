@@ -4,7 +4,7 @@ public class Queen extends Piece {
     }
 
     @Override
-    public boolean isValidMove(int fromX, int fromY, int toX, int toY, Model model) {
+    public int isValidMove(int fromX, int fromY, int toX, int toY, Model model) {
         int deltaX = Math.abs(toX - fromX);
         int deltaY = Math.abs(toY - fromY);
 
@@ -12,16 +12,16 @@ public class Queen extends Piece {
         if (deltaX == deltaY || fromX == toX || fromY == toY) {
             // Check for obstacles in the path
             if (!isPathClear(fromX, fromY, toX, toY, model)) {
-                return false;
+                return 0;
             }
             // Check if the destination is occupied by the same player's piece
             int destinationPiece = model.getBoardContents(toX, toY);
             if (destinationPiece != 0 && ((destinationPiece <= 6 && player == 1) || (destinationPiece >= 7 && player == 0))) {
-                return false;
+                return 0;
             }
-            return true;
+            return 1;
         }
-        return false;
+        return 0;
     }
 
     private boolean isPathClear(int fromX, int fromY, int toX, int toY, Model model) {

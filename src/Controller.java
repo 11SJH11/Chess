@@ -1,13 +1,11 @@
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Enumeration;
 
 public class Controller {
 
     Model model;
     View view;
     Dictionary<String, Integer> pieces;
-    Enumeration<String> k;
     public int click = 0;
 
     private int previousX = -1;
@@ -34,8 +32,6 @@ public class Controller {
         pieces.put("BlackBishop", 10);
         pieces.put("BlackQueen", 11);
         pieces.put("BlackKing", 12);
-
-        k = pieces.keys();
     }
 
     public void startup() {
@@ -54,6 +50,7 @@ public class Controller {
     }
 
     public void squareSelected(int player, int x, int y) {
+        
         System.out.println("x: " + x + " y: " + y + " Value: " + model.getBoardContents(x, y));
         if (click == 0) {
             if (correctPlayerMove(model.getPlayer(), x, y)) {
@@ -76,12 +73,23 @@ public class Controller {
 
     public void secondsquare(int player, int fromX, int fromY, int toX, int toY) {
         Piece piece = createPiece(fromX, fromY, model.getBoardContents(fromX, fromY));
-        if (piece != null && piece.isValidMove(fromX, fromY, toX, toY, model)) {
+        int validMove = piece.isValidMove(fromX, fromY, toX, toY, model);
+        if (piece != null && validMove == 1) {
             movePiece(fromX, fromY, toX, toY);
             view.feedback_to_user("Move successful");
             model.setPlayer(player == 1 ? 0 : 1); // Switch turns
             view.feedback_to_user(player == 1 ? "BLACK PLAYER - select piece to move" : "WHITE PLAYER - select piece to move");
+        } else if (validMove == 2) {
+            view.feedback_to_user("Move successful-Promoted to Queen");
+            promotePawn(fromX, fromY, toX, toY, player);
+            model.setPlayer(player == 1 ? 0 : 1);
+        }
+        else if (validMove == 3) {
+            view.feedback_to_user("Move successful-En passant");
+            enPassant(fromX, fromY, toX, toY, player);
+            model.setPlayer(player == 1 ? 0 : 1);
         } else {
+            System.out.println("IF4");
             view.feedback_to_user(player == 1? "Invalid move-White player select piece":"Invalid move-Black player select piece");
         }
         view.update();
@@ -122,6 +130,18 @@ public class Controller {
         int piece = model.getBoardContents(fromX, fromY);
         model.setBoardContents(fromX, fromY, 0);
         model.setBoardContents(toX, toY, piece);
+
+    }
+
+    private void promotePawn(int fromX, int fromY, int toX, int toY, int player) {
+        model.setBoardContents(fromX, fromY, 0);
+        model.setBoardContents(toX, toY, player == 1 ? pieces.get("WhiteQueen") : pieces.get("BlackQueen"));
+    }
+    private void enPassant(int fromX, int fromY, int toX, int toY, int player) {
+        int opponentPawnY = (player == 1) ? toX + 1 : toX - 1;
+        model.setBoardContents(fromX, fromY, 0);
+        model.setBoardContents(toX, toY, player == 1 ? pieces.get("WhitePawn") : pieces.get("BlackPawn"));
+        model.setBoardContents(opponentPawnY, toY, 0);
     }
 
     private boolean correctPlayerMove(int player, int x, int y){
