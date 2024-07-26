@@ -4,13 +4,43 @@ public class King extends Piece {
     }
 
 
+    public int isValidMove(int fromRow, int fromCol, int toRow, int toCol, Model model) {
+        int piece = model.getBoardContents(toRow, toCol);
 
-    //CASTLE
-    public int isValidMove(int fromX, int fromY, int toX, int toY, Model model) {
-        int piece = model.getBoardContents(toX, toY);
+        int playerRow = player == 1? 7:0;
+
+        int leftCastle = model.getBoardContents(playerRow, 1) +
+                         model.getBoardContents(playerRow, 2) + 
+                         model.getBoardContents(playerRow, 3);
+
+        int rightCastle = model.getBoardContents(playerRow, 5) +
+                         model.getBoardContents(playerRow, 6);
+
+        int deltaX = Math.abs(toRow - fromRow);
+        int deltaY = Math.abs(toCol - fromCol);
+
         
-        int deltaX = Math.abs(toX - fromX);
-        int deltaY = Math.abs(toY - fromY);
+        // Castle white left
+        if (player == 1 && leftCastle == 0 && (model.hasWhiteCastled() == false) && (playerRow == toRow && toCol == 2)) {
+            return -1;
+        }
+
+        // Castle white right
+        if (player == 1 && rightCastle == 0 && (model.hasWhiteCastled() == false) && (playerRow == toRow && toCol == 6)) {
+            return -2;
+        }
+        
+        // Castle black left
+        if (player == 0 && leftCastle == 0 && (model.hasBlackCastled() == false) && (playerRow == toRow && toCol == 2)) {
+            return -1;
+        }
+
+        // Castle black right
+        if (player == 0 && rightCastle == 0 && (model.hasBlackCastled() == false) && (playerRow == toRow && toCol == 6)) {
+            return -2;
+        }
+                
+    
 
         // King can move one square in any direction
         if (deltaX > 1 || deltaY > 1) {

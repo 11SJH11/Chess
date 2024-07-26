@@ -1,4 +1,5 @@
 import java.util.Dictionary;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 public class Controller {
@@ -8,8 +9,8 @@ public class Controller {
     Dictionary<String, Integer> pieces;
     public int click = 0;
 
-    private int previousX = -1;
-    private int previousY = -1;
+    private int previousRow = -1;
+    private int previousCol = -1;
 
     public Controller() {}
 
@@ -44,55 +45,79 @@ public class Controller {
         }
 
         starting_pieces();
+        refreshCapturedPieces();
+        model.setFinished(false);
         model.setPlayer(1);
+        model.setBlackCastled(false);
+        model.setWhiteCastled(false);
+        view.resetMessage();
         view.feedback_to_user("WHITE PLAYER- select piece to move");
         System.out.println("Startup");
     }
 
-    public void squareSelected(int player, int x, int y) {
+    public void squareSelected(int player, int row, int col) {
         
-        System.out.println("x: " + x + " y: " + y + " Value: " + model.getBoardContents(x, y));
+        System.out.println("Row: " + row + " Col: " + col + " Value: " + model.getBoardContents(row, col));
+        if (model.hasFinished()) {
+            return;
+        }
+
         if (click == 0) {
-            if (correctPlayerMove(model.getPlayer(), x, y)) {
-                previousX = x;
-                previousY = y;
+            if (correctPlayerMove(model.getPlayer(), row, col)) {
+                previousRow = row;
+                previousCol = col;
                 view.feedback_to_user("Select location to move to");
                 click = 1;
             } else {
                 view.feedback_to_user(model.getPlayer() == 1? "White player-select piece":"Black player-select piece");
             }
         } else {
-            if (previousX != -1 && previousY != -1) {
-                secondsquare(model.getPlayer(), previousX, previousY, x, y);
+            if (previousRow != -1 && previousCol != -1) {
+                secondsquare(model.getPlayer(), previousRow, previousCol, row, col);
             }
             click = 0;
-            previousX = -1;
-            previousY = -1;
+            previousRow = -1;
+            previousCol = -1;
         }
     }
 
-    public void secondsquare(int player, int fromX, int fromY, int toX, int toY) {
-        Piece piece = createPiece(fromX, fromY, model.getBoardContents(fromX, fromY));
-        int validMove = piece.isValidMove(fromX, fromY, toX, toY, model);
+    public void secondsquare(int player, int fromRow, int fromCol, int toRow, int toCol) {
+        Piece piece = createPiece(fromRow, fromCol, model.getBoardContents(fromRow, fromCol));
+        int validMove = piece.isValidMove(fromRow, fromCol, toRow, toCol, model);
         if (piece != null && validMove == 1) {
-            movePiece(fromX, fromY, toX, toY);
+            movePiece(fromRow, fromCol, toRow, toCol);
             view.feedback_to_user("Move successful");
             model.setPlayer(player == 1 ? 0 : 1); // Switch turns
             view.feedback_to_user(player == 1 ? "BLACK PLAYER - select piece to move" : "WHITE PLAYER - select piece to move");
         } else if (validMove == 2) {
             view.feedback_to_user("Move successful-Promoted to Queen");
-            promotePawn(fromX, fromY, toX, toY, player);
+            promotePawn(fromRow, fromCol, toRow, toCol, player);
             model.setPlayer(player == 1 ? 0 : 1);
         }
         else if (validMove == 3) {
             view.feedback_to_user("Move successful-En passant");
-            enPassant(fromX, fromY, toX, toY, player);
+            enPassant(fromRow, fromCol, toRow, toCol, player);
             model.setPlayer(player == 1 ? 0 : 1);
-        } else {
-            System.out.println("IF4");
+        }
+        else if (validMove == -1) {
+            view.feedback_to_user("Move successful-Queen Castle");
+            castleLeft(toRow, toCol, player);
+            model.setPlayer(player == 1 ? 0 : 1);
+            
+        } 
+        else if (validMove == -2) {
+            view.feedback_to_user("Move successful-King Castle");
+            castleRight(toRow, toCol, player);
+            model.setPlayer(player == 1 ? 0 : 1);
+            
+        } 
+        else {
             view.feedback_to_user(player == 1? "Invalid move-White player select piece":"Invalid move-Black player select piece");
         }
+        displayCapturedPieces(player);
+        
         view.update();
+        gameEnd();
     }
 
     private Piece createPiece(int x, int y, int pieceCode) {
@@ -126,23 +151,110 @@ public class Controller {
         }
     }
 
-    private void movePiece(int fromX, int fromY, int toX, int toY) {
-        int piece = model.getBoardContents(fromX, fromY);
-        model.setBoardContents(fromX, fromY, 0);
-        model.setBoardContents(toX, toY, piece);
+    private void movePiece(int fromRow, int fromCol, int toRow, int toCol) {
+        
+        int piece = model.getBoardContents(fromRow, fromCol);
+
+        int capturedPiece = model.getBoardContents(toRow, toCol);
+
+        // Check if a piece is being captured
+        if (capturedPiece != pieces.get("Empty")) {
+            boolean isWhiteCaptured = capturedPiece >= 7 && capturedPiece <= 12;
+            String pieceName = getPieceName(capturedPiece);
+            model.incrementCapturedPiece(isWhiteCaptured, pieceName);
+        }
+
+        model.setBoardContents(fromRow, fromCol, 0);
+        model.setBoardContents(toRow, toCol, piece);
 
     }
 
-    private void promotePawn(int fromX, int fromY, int toX, int toY, int player) {
-        model.setBoardContents(fromX, fromY, 0);
-        model.setBoardContents(toX, toY, player == 1 ? pieces.get("WhiteQueen") : pieces.get("BlackQueen"));
+    private String getPieceName(int pieceCode) {
+        switch (pieceCode) {
+            case 1:
+            case 7:
+                return "Pawn";
+            case 2:
+            case 8:
+                return "Rook";
+            case 3:
+            case 9:
+                return "Knight";
+            case 4:
+            case 10:
+                return "Bishop";
+            case 5:
+            case 11:
+                return "Queen";
+            case 6:
+            case 12:
+                return "King";
+            default:
+                return "Unknown";
+        }
     }
-    private void enPassant(int fromX, int fromY, int toX, int toY, int player) {
-        int opponentPawnY = (player == 1) ? toX + 1 : toX - 1;
-        model.setBoardContents(fromX, fromY, 0);
-        model.setBoardContents(toX, toY, player == 1 ? pieces.get("WhitePawn") : pieces.get("BlackPawn"));
-        model.setBoardContents(opponentPawnY, toY, 0);
+
+    private void promotePawn(int fromRow, int fromCol, int toRow, int toCol, int player) {
+        int capturedPiece = model.getBoardContents(toRow, toCol);
+
+        // Check if a piece is being captured
+        if (capturedPiece != pieces.get("Empty")) {
+            boolean isWhiteCaptured = capturedPiece >= 7 && capturedPiece <= 12;
+            String pieceName = getPieceName(capturedPiece);
+            model.incrementCapturedPiece(isWhiteCaptured, pieceName);
+        }
+        model.decrementCapturedPiece(player==1?false:true, getPieceName(5));
+        model.setBoardContents(fromRow, fromCol, 0);
+        model.setBoardContents(toRow, toCol, player == 1 ? pieces.get("WhiteQueen") : pieces.get("BlackQueen"));
     }
+
+
+    private void enPassant(int fromRow, int fromCol, int toRow, int toCol, int player) {
+        int opponentPawnY = (player == 1) ? toRow + 1 : toRow - 1;
+
+        int capturedPiece = model.getBoardContents(player==1?toRow+1:toRow-1, toCol);
+
+        // Check if a piece is being captured
+        if (capturedPiece != pieces.get("Empty")) {
+            boolean isWhiteCaptured = capturedPiece >= 7 && capturedPiece <= 12;
+            String pieceName = getPieceName(capturedPiece);
+            model.incrementCapturedPiece(isWhiteCaptured, pieceName);
+        }
+        model.setBoardContents(fromRow, fromCol, 0);
+        model.setBoardContents(toRow, toCol, player == 1 ? pieces.get("WhitePawn") : pieces.get("BlackPawn"));
+        model.setBoardContents(opponentPawnY, toCol, 0);
+    }
+
+
+    private void castleLeft(int toRow, int toCol, int player){
+        model.setBoardContents(player == 1 ? 7 : 0, 0, 0);
+        model.setBoardContents(player == 1 ? 7 : 0, 4, 0);
+        model.setBoardContents(toRow, toCol, player == 1 ? pieces.get("WhiteKing") : pieces.get("BlackKing"));
+        model.setBoardContents(toRow, toCol+1, player == 1 ? pieces.get("WhiteRook") : pieces.get("BlackRook"));
+        
+        if(player == 1){
+            model.setWhiteCastled(true);
+        }
+        else{
+            model.setBlackCastled(true);
+        }
+
+    }
+
+    private void castleRight(int toRow, int toCol, int player){
+        model.setBoardContents(player == 1 ? 7 : 0, 7, 0);
+        model.setBoardContents(player == 1 ? 7 : 0, 4, 0);
+        model.setBoardContents(toRow, toCol, player == 1 ? pieces.get("WhiteKing") : pieces.get("BlackKing"));
+        model.setBoardContents(toRow, toCol-1, player == 1 ? pieces.get("WhiteRook") : pieces.get("BlackRook"));  
+
+        if(player == 1){
+            model.setWhiteCastled(true);
+        }
+        else{
+            model.setBlackCastled(true);
+        }
+    }
+
 
     private boolean correctPlayerMove(int player, int x, int y){
         int piece = model.getBoardContents(x, y);
@@ -185,4 +297,53 @@ public class Controller {
         }
         view.update();
     }
+
+    public void displayCapturedPieces(int player) {
+        Dictionary<String, Integer> whiteCaptured = model.getWhiteCaptured();
+        Dictionary<String, Integer> blackCaptured = model.getBlackCaptured();
+       if (player == 1) {
+            for (Enumeration<String> keys = whiteCaptured.keys(); keys.hasMoreElements();) {
+                String key = keys.nextElement();
+                if(whiteCaptured.get(key) != 0){
+                    view.addPieceMessage(key);
+                }
+            }
+       }
+       else{
+            for (Enumeration<String> keys = blackCaptured.keys(); keys.hasMoreElements();) {
+                String key = keys.nextElement();
+                if(blackCaptured.get(key) != 0){
+                    view.addPieceMessage(key);
+                }
+                
+            }
+        }
+    }
+
+    public void refreshCapturedPieces() {
+        Dictionary<String, Integer> whiteCaptured = model.getWhiteCaptured();
+        Dictionary<String, Integer> blackCaptured = model.getBlackCaptured();
+
+        for (Enumeration<String> keys = whiteCaptured.keys(); keys.hasMoreElements();) {
+            String key = keys.nextElement();
+            whiteCaptured.put(key, 0);
+            blackCaptured.put(key, 0);
+        }
+    }
+
+    public void gameEnd(){
+        
+        System.out.println(model.getWhiteCaptured().get("King"));
+        if (model.getWhiteCaptured().get("King") > 0) {
+            model.setFinished(true);    
+            view.feedback_to_user("Black wins");   
+        }
+        if(model.getBlackCaptured().get("King") > 0) {
+            model.setFinished(true);       
+            view.feedback_to_user("White wins");
+        }
+                
+    }
+
+
 }

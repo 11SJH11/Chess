@@ -23,7 +23,9 @@ public class View extends JPanel{
     
     private JLabel messageLabel;
     private JLabel whitePiecesLabel;
+    private JLabel whiteDisplay;
     private JLabel blackPiecesLabel;
+    private JLabel blackDisplay;
     private JPanel[][] boardPanels;
     
 
@@ -111,6 +113,21 @@ public class View extends JPanel{
         playerFrame.setVisible(true);
     }
 
+    public void resetMessage(){
+        whitePiecesLabel.setText("White Pieces Captured");
+        blackPiecesLabel.setText("Black Pieces Captured");
+    }
+    public void addPieceMessage(String message){
+        if (model.getPlayer() == 0) {
+            whiteDisplay = new JLabel("Captured Pawns: 0");
+            whitePiecesLabel.add(whiteDisplay);
+        }
+        else if(model.getPlayer() == 1){
+            blackPiecesLabel.setText(blackPiecesLabel.getText() + " " + message);
+        }
+        
+    }
+
 
     public void feedback_to_user(String message){
         messageLabel.setText(message);
@@ -123,48 +140,48 @@ public class View extends JPanel{
     public void update(){
         int width = model.getBoardWidth();
         int height = model.getBoardHeight();
-        for ( int x = 0 ; x < width ; x++ ) {
-		    for ( int y = 0 ; y < height ; y++ ) {
-                switch (model.getBoardContents(x, y)) { // add / remove images onto square
+        for ( int row = 0 ; row < width ; row++ ) {
+		    for ( int col = 0 ; col < height ; col++ ) {
+                switch (model.getBoardContents(row, col)) { // add / remove images onto square
                     case 0:
-                        board.removePiece(x, y,  boardPanels);
+                        board.removePiece(row, col,  boardPanels);
                         break;
                     case 1:
-                        board.placePiece(x, y, "../rec/piece/w-pawn.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/w-pawn.png", boardPanels);
                         break;
                     case 2:
-                        board.placePiece(x, y, "../rec/piece/w-rook.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/w-rook.png", boardPanels);
                         break;
                     case 3:
-                        board.placePiece(x, y, "../rec/piece/w-knight.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/w-knight.png", boardPanels);
                         break;
                     case 4:
-                        board.placePiece(x, y, "../rec/piece/w-bishop.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/w-bishop.png", boardPanels);
                         break;
                     case 5:
-                        board.placePiece(x, y, "../rec/piece/w-queen.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/w-queen.png", boardPanels);
                         break;
                     case 6:
-                        board.placePiece(x, y, "../rec/piece/w-king.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/w-king.png", boardPanels);
                         break;
                     case 7:
-                        board.placePiece(x, y, "../rec/piece/b-pawn.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/b-pawn.png", boardPanels);
                         break;
                     case 8:
-                        board.placePiece(x, y, "../rec/piece/b-rook.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/b-rook.png", boardPanels);
                         break;
                     case 9:
-                        board.placePiece(x, y, "../rec/piece/b-knight.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/b-knight.png", boardPanels);
 
                         break;
                     case 10:
-                        board.placePiece(x, y, "../rec/piece/b-bishop.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/b-bishop.png", boardPanels);
                         break;
                     case 11:
-                        board.placePiece(x, y, "../rec/piece/b-queen.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/b-queen.png", boardPanels);
                         break;
                     case 12:
-                        board.placePiece(x, y, "../rec/piece/b-king.png", boardPanels);
+                        board.placePiece(row, col, "../rec/piece/b-king.png", boardPanels);
                         break;
 
                     

@@ -1,3 +1,6 @@
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 public class Model
 {
 	int [][] boardContents;
@@ -5,16 +8,24 @@ public class Model
 	int height;
 	int player;
 	boolean finished;
+	boolean whiteCastle;
+	boolean blackCastle;
 	View view;
 	Controller controller;
-	private int lastMoveFromX = -1;
-    private int lastMoveFromY = -1;
-    private int lastMoveToX = -1;
+	private int lastMoveFromRow = -1;
+    private int lastMoveFromCol = -1;
+    private int lastMoveToRow = -1;
     private int lastMoveToY = -1;
-    private int lastMovePiece = -1;
-
+    private int lastMovePiece = -1; 
+	
+	Dictionary<String, Integer> whiteCaptured;
+    Dictionary<String, Integer> blackCaptured;
 	
 	public Model() {
+		whiteCaptured = new Hashtable<>();
+        blackCaptured = new Hashtable<>();
+        initialiseCapturedPieces(whiteCaptured);
+        initialiseCapturedPieces(blackCaptured);
     }
 	
 	public void initialise(int width, int height, View view, Controller controller)
@@ -25,6 +36,34 @@ public class Model
 		this.controller = controller;
 		boardContents = new int[width][height];
 	}
+
+
+
+	private void initialiseCapturedPieces(Dictionary<String, Integer> captured) {
+        captured.put("Pawn", 0);
+        captured.put("Rook", 0);
+        captured.put("Knight", 0);
+        captured.put("Bishop", 0);
+        captured.put("Queen", 0);
+        captured.put("King", 0);
+    }
+
+	public Dictionary<String, Integer> getWhiteCaptured() {
+        return whiteCaptured;
+    }
+
+    public Dictionary<String, Integer> getBlackCaptured() {
+        return blackCaptured;
+    }
+
+	public void incrementCapturedPiece(boolean isWhite, String pieceName) {
+        Dictionary<String, Integer> captured = isWhite ? blackCaptured : whiteCaptured;
+        captured.put(pieceName, captured.get(pieceName) + 1);
+    }
+	public void decrementCapturedPiece(boolean isWhite, String pieceName) {
+        Dictionary<String, Integer> captured = isWhite ? blackCaptured : whiteCaptured;
+        captured.put(pieceName, captured.get(pieceName) - 1);
+    }
 
 	
 	public void clear(int value)
@@ -47,15 +86,15 @@ public class Model
 	}
 
 	
-	public int getBoardContents(int x, int y)
+	public int getBoardContents(int row, int col)
 	{
-		return boardContents[x][y];
+		return boardContents[row][col];
 	}
 
 	
-	public void setBoardContents(int x, int y, int value)
+	public void setBoardContents(int row, int col, int value)
 	{
-		boardContents[x][y] = value;
+		boardContents[row][col] = value;
 	}
 
 	
@@ -82,16 +121,33 @@ public class Model
 		this.finished = finished;
 	}
 
-	public void setLastMove(int fromX, int fromY, int toX, int toY, int piece) {
-        this.lastMoveFromX = fromX;
-        this.lastMoveFromY = fromY;
-        this.lastMoveToX = toX;
-        this.lastMoveToY = toY;
+	public void setWhiteCastled(boolean whiteCastle){
+		this.whiteCastle = whiteCastle;
+	}
+
+	public boolean hasWhiteCastled(){
+		return whiteCastle;
+	}
+
+	public void setBlackCastled(boolean blackCastle){
+		this.blackCastle = blackCastle;
+	}
+
+	public boolean hasBlackCastled(){
+		return blackCastle;
+	}
+
+
+	public void setLastMove(int fromRow, int fromCol, int toRow, int toCol, int piece) {
+        this.lastMoveFromRow = fromRow;
+        this.lastMoveFromCol = fromCol;
+        this.lastMoveToRow = toRow;
+        this.lastMoveToY = toCol;
         this.lastMovePiece = piece;
     }
 
     public boolean isLastMoveDoublePawnMove(int x, int y) {
-        return !(Math.abs(lastMoveToY - lastMoveFromY) == 2 && lastMoveToX == x && lastMoveToY == y &&
+        return !(Math.abs(lastMoveToY - lastMoveFromCol) == 2 && lastMoveToRow == x && lastMoveToY == y &&
             (lastMovePiece == 1 || lastMovePiece == 7));
     }
 }
