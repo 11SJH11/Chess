@@ -1,15 +1,9 @@
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;

@@ -10,12 +10,12 @@ public class Controller {
     Enumeration<String> k;
     public int click = 0;
 
+    private int previousX = -1;
+    private int previousY = -1;
 
-    public Controller(){
+    public Controller() {}
 
-    }
-
-    public void initialise(Model model, View view){
+    public void initialise(Model model, View view) {
         this.model = model;
         this.view = view;
         
@@ -38,47 +38,103 @@ public class Controller {
         k = pieces.keys();
     }
 
-
     public void startup() {
-        //set pieces+messages
-
         int width = model.getBoardWidth();
-		int height = model.getBoardHeight();
-		for ( int x = 0 ; x < width ; x++ )
-			for ( int y = 0 ; y < height ; y++ )
-				model.setBoardContents(x, y, 0);
+        int height = model.getBoardHeight();
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                model.setBoardContents(x, y, 0);
+            }
+        }
 
         starting_pieces();
-        
-
         model.setPlayer(1);
-        
+        view.feedback_to_user("WHITE PLAYER- select piece to move");
         System.out.println("Startup");
     }
 
-    
-    public void squareSelected(int player, int x, int y){
-        System.out.println("x: "+x +" y: "+y+" " + model.getBoardContents(x, y));
-        if (click==0) {
-            view.feedback_to_user("Select location to move to");
-            click=1;
-        }else{
-            secondsquare(player, x, y);
-            click=0;
+    public void squareSelected(int player, int x, int y) {
+        System.out.println("x: " + x + " y: " + y + " Value: " + model.getBoardContents(x, y));
+        if (click == 0) {
+            if (correctPlayerMove(model.getPlayer(), x, y)) {
+                previousX = x;
+                previousY = y;
+                view.feedback_to_user("Select location to move to");
+                click = 1;
+            } else {
+                view.feedback_to_user(model.getPlayer() == 1? "White player-select piece":"Black player-select piece");
+            }
+        } else {
+            if (previousX != -1 && previousY != -1) {
+                secondsquare(model.getPlayer(), previousX, previousY, x, y);
+            }
+            click = 0;
+            previousX = -1;
+            previousY = -1;
         }
-        
     }
 
-    //check move is valid--if true move piece
-    //if false--send user message no valid move and to choose another piece+location
-    public void secondsquare(int player, int x, int y){
-        view.feedback_to_user("Select piece to move");
+    public void secondsquare(int player, int fromX, int fromY, int toX, int toY) {
+        Piece piece = createPiece(fromX, fromY, model.getBoardContents(fromX, fromY));
+        if (piece != null && piece.isValidMove(fromX, fromY, toX, toY, model)) {
+            movePiece(fromX, fromY, toX, toY);
+            view.feedback_to_user("Move successful");
+            model.setPlayer(player == 1 ? 0 : 1); // Switch turns
+            view.feedback_to_user(player == 1 ? "BLACK PLAYER - select piece to move" : "WHITE PLAYER - select piece to move");
+        } else {
+            view.feedback_to_user(player == 1? "Invalid move-White player select piece":"Invalid move-Black player select piece");
+        }
         view.update();
     }
 
+    private Piece createPiece(int x, int y, int pieceCode) {
+        switch (pieceCode) {
+            case 1:
+                return new Pawn(x, y, 1);
+            case 2:
+                return new Rook(x, y, 1);
+            case 3:
+                return new Knight(x, y, 1);   
+            case 4:
+                return new Bishop(x, y, 1);
+            case 5:
+                return new Queen(x, y, 1);
+            case 6:
+                return new King(x, y, 1);
+            case 7:
+                return new Pawn(x, y, 0);
+            case 8:
+                return new Rook(x, y, 0);
+            case 9:
+                return new Knight(x, y, 0);
+            case 10:
+                return new Bishop(x, y, 0);
+            case 11:
+                return new Queen(x, y, 0);
+            case 12:
+                return new King(x, y, 0);
+            default:
+                return null;
+        }
+    }
 
+    private void movePiece(int fromX, int fromY, int toX, int toY) {
+        int piece = model.getBoardContents(fromX, fromY);
+        model.setBoardContents(fromX, fromY, 0);
+        model.setBoardContents(toX, toY, piece);
+    }
 
-    public void starting_pieces(){
+    private boolean correctPlayerMove(int player, int x, int y){
+        int piece = model.getBoardContents(x, y);
+        if (player == 1 && piece >= 1 && piece <= 6) {
+            return true; // white's turn
+        } else if (player == 0 && piece >= 7 && piece <= 12) {
+            return true; // black's turn
+        }
+        return false;
+    }
+
+    public void starting_pieces() {
         int i, j;
         model.setBoardContents(0, 0, pieces.get("BlackRook"));
         model.setBoardContents(0, 1, pieces.get("BlackKnight"));
@@ -98,19 +154,15 @@ public class Controller {
         model.setBoardContents(7, 6, pieces.get("WhiteKnight"));
         model.setBoardContents(7, 7, pieces.get("WhiteRook"));
 
-        for(i=0; i<8; i++){
+        for (i = 0; i < 8; i++) {
             model.setBoardContents(1, i, pieces.get("BlackPawn"));
             model.setBoardContents(6, i, pieces.get("WhitePawn"));
         }
-        for(i=2; i<6; i++){
-            for(j=0; j<7; j++){
+        for (i = 2; i < 6; i++) {
+            for (j = 0; j < 7; j++) {
                 model.setBoardContents(i, j, pieces.get("Empty"));
             }
         }
         view.update();
     }
-
-    
-
-
 }

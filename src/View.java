@@ -3,21 +3,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-
-
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
 import java.awt.Color;
-
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import java.awt.Dimension;
-
 import java.awt.event.MouseEvent;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 
 
 public class View extends JPanel{
@@ -44,6 +35,7 @@ public class View extends JPanel{
     public void initialise(Model model, Controller controller){
         this.model = model;
         this.controller = controller;
+        model.setPlayer(1);
         createFrame();
     }
 
@@ -59,9 +51,10 @@ public class View extends JPanel{
         playerFrame.setLayout(null);
         playerFrame.getContentPane().setBackground(new Color(50, 50, 50));
         playerFrame.setLocationRelativeTo(null);
+        System.out.println(model.getPlayer());
 
         board.setBounds(0, 0, 800, 800);
-    	board.createBoard(1, boardPanels, controller);
+    	board.createBoard(model.getPlayer(), boardPanels, controller);
         playerFrame.add(board);
 
         
