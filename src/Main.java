@@ -13,9 +13,6 @@ public class Main {
         controller = new Controller();
         
         
-
-
-
         model.initialise(8, 8, view, controller);
         controller.initialise(model, view);
         view.initialise(model, controller);

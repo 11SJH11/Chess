@@ -5,9 +5,6 @@ public class Pawn extends Piece {
     }
 
 
-
-
-
     //check pawn moves are valid
     
     @Override

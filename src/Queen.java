@@ -8,7 +8,6 @@ public class Queen extends Piece {
         int deltaX = Math.abs(toX - fromX);
         int deltaY = Math.abs(toY - fromY);
 
-        // Queen can move like a rook (horizontal or vertical) or like a bishop (diagonal)
         if (deltaX == deltaY || fromX == toX || fromY == toY) {
             // Check for obstacles in the path
             if (!isPathClear(fromX, fromY, toX, toY, model)) {

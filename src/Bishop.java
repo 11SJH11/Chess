@@ -19,6 +19,7 @@ public class Bishop extends Piece {
             if (destinationPiece != 0 && ((destinationPiece <= 6 && player == 1) || (destinationPiece >= 7 && player == 0))) {
                 return 0;
             }
+            
             return 1;
         }
         return 0;

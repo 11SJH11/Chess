@@ -23,8 +23,6 @@ public class View extends JPanel{
     Controller controller;
     
     private JLabel messageLabel;
-    private JLabel whitePiecesLabel;
-    private JLabel blackPiecesLabel;
     private JPanel whitePiecesPanel;
     private JPanel blackPiecesPanel;
     private JPanel[][] boardPanels;
@@ -43,7 +41,6 @@ public class View extends JPanel{
     }
 
 
-
     private void createFrame() {
     	
         JFrame playerFrame = new JFrame("Chess");
@@ -54,13 +51,11 @@ public class View extends JPanel{
         playerFrame.setLayout(null);
         playerFrame.getContentPane().setBackground(new Color(50, 50, 50));
         playerFrame.setLocationRelativeTo(null);
-        System.out.println(model.getPlayer());
 
         board.setBounds(0, 0, 800, 800);
     	board.createBoard(model.getPlayer(), boardPanels, controller);
         playerFrame.add(board);
 
-        
 
         messageLabel = new JLabel();
         messageLabel.setText("WHITE PLAYER- select piece to move");
@@ -158,8 +153,6 @@ public class View extends JPanel{
     }
 
 
-
-
     public void update(){
         int width = model.getBoardWidth();
         int height = model.getBoardHeight();
@@ -212,10 +205,6 @@ public class View extends JPanel{
         }
 
     }
-
-
-
-
 
 }
 

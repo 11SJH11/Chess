@@ -1,7 +1,7 @@
 public abstract class Piece {
     protected int x;
     protected int y;
-    protected int player; // 1 for white, 2 for black
+    protected int player; // 1 for white, 0 for black
 
     public Piece(int x, int y, int player) {
         this.x = x;

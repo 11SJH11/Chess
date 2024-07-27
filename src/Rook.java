@@ -36,7 +36,6 @@ public class Rook extends Piece {
         if (piece != 0 && ((piece <= 6 && player == 1) || (piece >= 7 && player == 0))) {
             return 0;
         }
-
         return 1;
 
        

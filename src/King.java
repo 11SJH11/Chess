@@ -40,8 +40,6 @@ public class King extends Piece {
             return -2;
         }
                 
-    
-
         // King can move one square in any direction
         if (deltaX > 1 || deltaY > 1) {
             return 0;
@@ -52,4 +50,7 @@ public class King extends Piece {
         }
         return 1;
     }
+
+    
+
 }
