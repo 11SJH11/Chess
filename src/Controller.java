@@ -45,12 +45,12 @@ public class Controller {
         }
 
         starting_pieces();
-        refreshCapturedPieces();
+        view.clearPanels();
+        resetCaptured();
         model.setFinished(false);
         model.setPlayer(1);
         model.setBlackCastled(false);
         model.setWhiteCastled(false);
-        view.resetMessage();
         view.feedback_to_user("WHITE PLAYER- select piece to move");
         System.out.println("Startup");
     }
@@ -114,8 +114,8 @@ public class Controller {
         else {
             view.feedback_to_user(player == 1? "Invalid move-White player select piece":"Invalid move-Black player select piece");
         }
+                
         displayCapturedPieces(player);
-        
         view.update();
         gameEnd();
     }
@@ -207,8 +207,6 @@ public class Controller {
         model.setBoardContents(fromRow, fromCol, 0);
         model.setBoardContents(toRow, toCol, player == 1 ? pieces.get("WhiteQueen") : pieces.get("BlackQueen"));
     }
-
-
     private void enPassant(int fromRow, int fromCol, int toRow, int toCol, int player) {
         int opponentPawnY = (player == 1) ? toRow + 1 : toRow - 1;
 
@@ -297,30 +295,27 @@ public class Controller {
         }
         view.update();
     }
-
+    int count = 0;
     public void displayCapturedPieces(int player) {
         Dictionary<String, Integer> whiteCaptured = model.getWhiteCaptured();
         Dictionary<String, Integer> blackCaptured = model.getBlackCaptured();
-       if (player == 1) {
+           
+        
+            if (count == 6) {
+                view.clearPanels();
+                count = 0;
+            }
+            
             for (Enumeration<String> keys = whiteCaptured.keys(); keys.hasMoreElements();) {
                 String key = keys.nextElement();
-                if(whiteCaptured.get(key) != 0){
-                    view.addPieceMessage(key);
-                }
-            }
-       }
-       else{
-            for (Enumeration<String> keys = blackCaptured.keys(); keys.hasMoreElements();) {
-                String key = keys.nextElement();
-                if(blackCaptured.get(key) != 0){
-                    view.addPieceMessage(key);
-                }
-                
-            }
-        }
+                view.addPieceMessage(key, whiteCaptured.get(key), 0);
+                view.addPieceMessage(key, blackCaptured.get(key), 1);
+                count++; 
+            }   
+            
     }
 
-    public void refreshCapturedPieces() {
+    public void resetCaptured(){
         Dictionary<String, Integer> whiteCaptured = model.getWhiteCaptured();
         Dictionary<String, Integer> blackCaptured = model.getBlackCaptured();
 
@@ -329,7 +324,9 @@ public class Controller {
             whiteCaptured.put(key, 0);
             blackCaptured.put(key, 0);
         }
+
     }
+    
 
     public void gameEnd(){
         
@@ -344,6 +341,5 @@ public class Controller {
         }
                 
     }
-
 
 }

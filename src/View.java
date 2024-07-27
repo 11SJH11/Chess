@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import java.awt.event.MouseEvent;
 import java.awt.Cursor;
 import java.awt.event.MouseAdapter;
+import java.awt.GridLayout;
 
 
 public class View extends JPanel{
@@ -23,9 +24,9 @@ public class View extends JPanel{
     
     private JLabel messageLabel;
     private JLabel whitePiecesLabel;
-    private JLabel whiteDisplay;
     private JLabel blackPiecesLabel;
-    private JLabel blackDisplay;
+    private JPanel whitePiecesPanel;
+    private JPanel blackPiecesPanel;
     private JPanel[][] boardPanels;
     
 
@@ -67,7 +68,7 @@ public class View extends JPanel{
         messageLabel.setOpaque(true);
         messageLabel.setForeground(Color.white);
         messageLabel.setBackground(new Color(72, 72, 72));
-        messageLabel.setBounds(802, 3, WIDTH-805, 50);  // Set position and size for the label
+        messageLabel.setBounds(802, 3, WIDTH-804, 50);  // Set position and size for the label
         playerFrame.add(messageLabel);
 
         Icon icon = new ImageIcon("../rec/Restart.png");
@@ -93,41 +94,64 @@ public class View extends JPanel{
         });
         playerFrame.add(restartButton);
 
-        whitePiecesLabel = new JLabel();
+        JLabel whitePiecesLabel = new JLabel();
         whitePiecesLabel.setText("White Pieces Captured");
         whitePiecesLabel.setHorizontalAlignment(SwingConstants.LEFT);
         whitePiecesLabel.setOpaque(false);
         whitePiecesLabel.setForeground(Color.white);
-        whitePiecesLabel.setBounds(810, 103, WIDTH-805, 50);  // Set position and size for the label
+        whitePiecesLabel.setBounds(810, 103, WIDTH - 805, 50);  // Set position and size for the label
         playerFrame.add(whitePiecesLabel);
 
+        whitePiecesPanel = new JPanel();
+        whitePiecesPanel.setBounds(802, 138, WIDTH - 804, 150);
+        whitePiecesPanel.setBackground(new Color(72, 72, 72));
+        whitePiecesPanel.setLayout(new GridLayout(0, 1));
+        playerFrame.add(whitePiecesPanel);
 
-        blackPiecesLabel = new JLabel();
+        JLabel blackPiecesLabel = new JLabel();
         blackPiecesLabel.setText("Black Pieces Captured");
         blackPiecesLabel.setHorizontalAlignment(SwingConstants.LEFT);
         blackPiecesLabel.setOpaque(false);
         blackPiecesLabel.setForeground(Color.white);
-        blackPiecesLabel.setBounds(810, 303, WIDTH-805, 50);  // Set position and size for the label
+        blackPiecesLabel.setBounds(810, 303, WIDTH - 805, 50);  // Set position and size for the label
         playerFrame.add(blackPiecesLabel);
+
+        blackPiecesPanel = new JPanel();
+        blackPiecesPanel.setBounds(802, 338, WIDTH - 804, 150);
+        blackPiecesPanel.setBackground(new Color(72, 72, 72));
+        blackPiecesPanel.setLayout(new GridLayout(0, 1));
+        playerFrame.add(blackPiecesPanel);
 
         playerFrame.setVisible(true);
     }
 
-    public void resetMessage(){
-        whitePiecesLabel.setText("White Pieces Captured");
-        blackPiecesLabel.setText("Black Pieces Captured");
-    }
-    public void addPieceMessage(String message){
-        if (model.getPlayer() == 0) {
-            whiteDisplay = new JLabel("Captured Pawns: 0");
-            whitePiecesLabel.add(whiteDisplay);
+    public void addPieceMessage(String pieceName, int amountTaken, int player) {
+        JLabel pieceLabel = new JLabel(pieceName + ": " + amountTaken);
+        pieceLabel.setForeground(Color.white);
+        if (player == 0) {
+            whitePiecesPanel.add(pieceLabel);
+            whitePiecesPanel.revalidate();
+            whitePiecesPanel.repaint();
+        } else {
+            blackPiecesPanel.add(pieceLabel);
+            blackPiecesPanel.revalidate();
+            blackPiecesPanel.repaint();
         }
-        else if(model.getPlayer() == 1){
-            blackPiecesLabel.setText(blackPiecesLabel.getText() + " " + message);
-        }
+        
         
     }
 
+    public void clearPanels(){
+        
+            whitePiecesPanel.removeAll();
+            whitePiecesPanel.revalidate();
+            whitePiecesPanel.repaint();
+        
+            blackPiecesPanel.removeAll();
+            blackPiecesPanel.revalidate();
+            blackPiecesPanel.repaint();
+        
+    }
 
     public void feedback_to_user(String message){
         messageLabel.setText(message);
@@ -135,14 +159,13 @@ public class View extends JPanel{
 
 
 
-    
 
     public void update(){
         int width = model.getBoardWidth();
         int height = model.getBoardHeight();
         for ( int row = 0 ; row < width ; row++ ) {
 		    for ( int col = 0 ; col < height ; col++ ) {
-                switch (model.getBoardContents(row, col)) { // add / remove images onto square
+                switch (model.getBoardContents(row, col)) {
                     case 0:
                         board.removePiece(row, col,  boardPanels);
                         break;
@@ -172,7 +195,6 @@ public class View extends JPanel{
                         break;
                     case 9:
                         board.placePiece(row, col, "../rec/piece/b-knight.png", boardPanels);
-
                         break;
                     case 10:
                         board.placePiece(row, col, "../rec/piece/b-bishop.png", boardPanels);
